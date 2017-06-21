@@ -69,7 +69,7 @@ if __name__ == '__main__':
         stdout.flush()
         for x in range(0,out.shape[1]):
             if(stack[0,y,x]!=65535):
-                out[y,x] = np.percentile(stack[:,y,x],perc)
+                out[y,x] = np.percentile(stack[:,y,x],perc,interpolation='lower')
                 outdk[y,x] = np.min(stack[:,y,x])#np.percentile(stack[:,y,x],loperc)
     stdout.write("\n")
     out[ndmask>0]=0
