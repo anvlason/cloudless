@@ -1,15 +1,27 @@
 #!/usr/bin/perl
-if($#ARGV!=4){
-    print "Usage:\nrun_for_landsat.pl [start_path] [end_path] [start_row] [end_row]\n"
+if($#ARGV<3){
+    print "Usage:\nrun_for_landsat.pl [start_path] [end_path] [start_row] [end_row] <prc> <mkdc> <mkcolor>\n";
+    exit(0);
 }
 my $spath = $ARGV[0];
 my $epath = $ARGV[1];
 my $srow  = $ARGV[2];
 my $erow  = $ARGV[3];
-my $prc = 5;
+my $prc   = 25;
+my $mkdc  = 0;
+my $mkcolor = 0;
+
+if($#ARGV==6){
+  $prc   = $ARGV[4];
+  $mkdc  = $ARGV[5];
+  $mkcolor = $ARGV[6];
+} 
+
 
 my $DIR_IN = "/mnt/hdfs/OLI_TOA/scenes";
 my $DIR_OUT = "/data/cloudless";
+
+print "Parameters:\nstart_path = $spath\nend_path=$epath\nstart_row=$srow\nend_row=$erow\nPercentile=$prc\n";
 
 for (my $i=$spath;$i<=$epath;$i++){
   my $path = sprintf("%03d",$i);
@@ -19,7 +31,7 @@ for (my $i=$spath;$i<=$epath;$i++){
     my $odir = $DIR_OUT."/$path/$row/";
     print "$dir\n";
     if(-d $dir){
-        system("sudo docker run -i -v $DIR_IN:/data:rw -v $DIR_OUT:/out:rw --rm avs/cloudless.v1.1 run_by_dir.pl /data/$path/$row /out/$path/$row $prc");
+        system("sudo docker run -i -v $DIR_IN:/data:rw -v $DIR_OUT:/out:rw --rm cloudless_v.2.0 run_by_dir.pl /data/$path/$row /out/$path/$row $prc $mkdc $mkcolor");
     }
   }
 }

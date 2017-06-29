@@ -8,7 +8,7 @@ import sys
 import re
 import errno
 
-global prc
+global prc, mkdc
 
 #-----------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------
@@ -36,13 +36,18 @@ def runner(iname):
     oname = re.sub(".vrt","_cloudless.tif",oname)
     bn = os.path.basename(oname)
     oname = "/tmp/"+bn
-    os.system("%s %s %s %d"%(proc,iname,oname,prc))
+    os.system("%s %s %s %d %d"%(proc,iname,oname,prc,mkdc))
 #-----------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------
 if __name__ == '__main__':
     folder = sys.argv[1]
     ofolder = sys.argv[2]
-    prc = float(sys.argv[3])
+    try:
+        prc = float(sys.argv[3])
+        mkdc = int(sys.argv[4])
+    except:
+        prc = 25
+        mkdc = 0
     images = get_data_paths(folder)
     mkdir_p(ofolder)
 

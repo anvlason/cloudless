@@ -2,14 +2,22 @@
 use File::Basename;
 use strict; 
 
-if($#ARGV!=2){
-    print "Usage:\nrun_for_landsat.pl [start_path] [end_path] [start_row] [end_row]\n"
+if($#ARGV<1){
+    print "Usage:\nrun_for_landsat.pl [start_path] [end_row] <prc> <mkdc> <mkcolor>\n";
+    exit(0);
 }
 my $spath = $ARGV[0];
 #my $epath = $ARGV[1];
 #my $srow  = $ARGV[2];
 my $erow  = $ARGV[1];#$ARGV[3];
-my $prc = 5;
+my $prc   = 25;
+my $mkdc  = 0;
+my $mkcolor = 0;
+if($#ARGV==4){
+  $prc   = $ARGV[2];
+  $mkdc  = $ARGV[3];
+  $mkcolor  = $ARGV[4];
+}
 
 my $DIR_IN = "/mnt/hdfs/S2/tiles";
 my $DIR_OUT = "/data/cloudless";
@@ -21,7 +29,7 @@ foreach my $dir (glob("$DIR_IN/$spath/$erow*")){
     my $odir = $DIR_OUT."/$path/$row/";
     if(-d $dir){
         if(-d $odir) { next;} 
-        system("sudo docker run -i -v $DIR_IN:/data:rw -v $DIR_OUT:/out:rw --rm avs/cloudless.v1.2 run_by_dir_s.pl /data/$path/$row /out/$path/$row $prc");
+        system("sudo docker run -i -v $DIR_IN:/data:rw -v $DIR_OUT:/out:rw --rm cloudless_v.2.0 run_by_dir_s.pl /data/$path/$row /out/$path/$row $prc $mkdc $mkcolor");
     }
 }
 

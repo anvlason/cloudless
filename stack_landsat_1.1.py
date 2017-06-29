@@ -4,7 +4,7 @@
 #******************************************************************************
 #Script for dark-stack
 #Cloud and shadow detection and removal for Landsat-8 data
-#version 1.1
+#version 1.2
 #******************************************************************************
 
 from osgeo import gdal
@@ -49,6 +49,13 @@ if __name__ == '__main__':
     outname = sys.argv[2]#re.sub(".vrt",".tif",srcname)
     outdkname = os.path.splitext(outname)[0]+"_dc"+os.path.splitext(outname)[1]
     perc    = float(sys.argv[3])
+    mkdc = 0
+    try:
+        mkdc = int(sys.argv[4])
+        if(mkdc!=0):
+            print "Dark Current layer creation enabled"
+    except:
+        mkdc = 0
     loperc = 1.0
     try:
         sds = gdal.Open(srcname)
@@ -70,14 +77,18 @@ if __name__ == '__main__':
         for x in range(0,out.shape[1]):
             if(stack[0,y,x]!=65535):
                 out[y,x] = np.percentile(stack[:,y,x],perc,interpolation='lower')
-                outdk[y,x] = np.min(stack[:,y,x])#np.percentile(stack[:,y,x],loperc)
+                if(mkdc!=0):
+                    outdk[y,x] = np.min(stack[:,y,x])#np.percentile(stack[:,y,x],loperc)
     stdout.write("\n")
     out[ndmask>0]=0
-    outdk[ndmask>0]=0
+    if(mkdc!=0):
+        outdk[ndmask>0]=0
     print "calc data done by %f sec"%(timeit.default_timer()-tic)
     gdal_write(outname,out,sds,0,gdal.GDT_UInt16)
-    gdal_write(outdkname,outdk,sds,0,gdal.GDT_UInt16)
-    del stack,out,outdk,sds,ndmask
+    if(mkdc!=0):
+        gdal_write(outdkname,outdk,sds,0,gdal.GDT_UInt16)
+        del outdk
+    del stack,out,sds,ndmask
     gc.collect()
     print "Processed by %f sec"%(timeit.default_timer()-tic)
     print "Done"
